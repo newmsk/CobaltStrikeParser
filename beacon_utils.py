@@ -69,12 +69,12 @@ def decrypt_beacon(buf):
     head_enc = struct.unpack_from('<I', buf, offset+8)[0] ^ key
     head = head_enc & 0xffff
 
+    decoded_data = b''
     # Taken directly from L8_get_beacon.py
     if head == 0x5a4d or head ==0x9090:
-        decoded_data = b''
         for i in range(2+offset//4, len(buf)//4-4):
             a = struct.unpack_from('<I', buf, i*4)[0]
             b = struct.unpack_from('<I', buf, i*4+4)[0]
             с = a ^ b
             decoded_data += struct.pack('<I', с)
-        return decoded_data
+    return decoded_data
