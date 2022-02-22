@@ -256,7 +256,7 @@ class packedSetting:
 class BeaconSettings:
 
     BEACON_TYPE = {0x0: "HTTP", 0x1: "Hybrid HTTP DNS", 0x2: "SMB", 0x4: "TCP", 0x8: "HTTPS", 0x10: "Bind TCP"}
-    ACCESS_TYPE = {0x1: "Use direct connection", 0x2: "Use IE settings", 0x4: "Use proxy server"}
+    ACCESS_TYPE = {0x0: "Use proxy server (manual)", 0x1: "Use direct connection", 0x2: "Use IE settings", 0x4: "Use proxy server (credentials)"}
     EXECUTE_TYPE = {0x1: "CreateThread", 0x2: "SetThreadContext", 0x3: "CreateRemoteThread", 0x4: "RtlCreateUserThread", 0x5: "NtQueueApcThread", 0x6: None, 0x7: None, 0x8: "NtQueueApcThread-s"}
     ALLOCATION_FUNCTIONS = {0: "VirtualAllocEx", 1: "NtMapViewOfSection"}
     TSTEPS = {1: "append", 2: "prepend", 3: "base64", 4: "print", 5: "parameter", 6: "header", 7: "build", 8: "netbios", 9: "const_parameter", 10: "const_header", 11: "netbiosu", 12: "uri_append", 13: "base64url", 14: "strrep", 15: "mask", 16: "const_host_header"}
@@ -318,7 +318,8 @@ class BeaconSettings:
         self.settings['Proxy_User'] = packedSetting(33, confConsts.TYPE_STR, 64)
         self.settings['Proxy_Password'] = packedSetting(34, confConsts.TYPE_STR, 64)
         self.settings['Proxy_Behavior'] = packedSetting(35, confConsts.TYPE_SHORT, enum=self.ACCESS_TYPE)
-        # Option 36 is deprecated
+        # Option 36 is deprecated in beacon < 4.5
+        self.settings['Watermark_Hash'] = packedSetting(36, confConsts.TYPE_STR, 32)
         self.settings['Watermark'] = packedSetting(37, confConsts.TYPE_INT)
         self.settings['bStageCleanup'] = packedSetting(38, confConsts.TYPE_SHORT, isBool=True)
         self.settings['bCFGCaution'] = packedSetting(39, confConsts.TYPE_SHORT, isBool=True)
@@ -358,7 +359,12 @@ class BeaconSettings:
         self.settings['DNS_strategy'] = packedSetting(67, confConsts.TYPE_SHORT, enum=self.ROTATE_STRATEGY)
         self.settings['DNS_strategy_rotate_seconds'] = packedSetting(68, confConsts.TYPE_INT)
         self.settings['DNS_strategy_fail_x'] = packedSetting(69, confConsts.TYPE_INT)
-        self.settings['DNS_strategy_fail_seconds'] = packedSetting(70, confConsts.TYPE_INT)
+        self.settings['DNS_strategy_fail_seconds'] = packedSetting(70, confConsts.TYPE_INT)        
+        
+        # Retry settings (CS 4.5+ only)
+        self.settings['Retry_Max_Attempts'] = packedSetting(71, confConsts.TYPE_INT)
+        self.settings['Retry_Increase_Attempts'] = packedSetting(72, confConsts.TYPE_INT)
+        self.settings['Retry_Duration'] = packedSetting(73, confConsts.TYPE_INT)
 
 
 class cobaltstrikeConfig:
@@ -547,6 +553,10 @@ if __name__ == '__main__':
         if cobaltstrikeConfig(BytesIO(conf_data)).parse_config(version=args.version, quiet=args.quiet, as_json=args.json) or \
         cobaltstrikeConfig(BytesIO(conf_data)).parse_encrypted_config(version=args.version, quiet=args.quiet, as_json=args.json):
             exit(0)
+
+    else:
+        print("[-] Target path is not an existing file or a C2 URL")
+        exit(1)
 
     print("[-] Failed to find any beacon configuration")
     exit(1)
