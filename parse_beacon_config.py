@@ -41,9 +41,9 @@ class confConsts:
 
     START_PATTERNS = {
     3: b'\x69\x68\x69\x68\x69\x6b..\x69\x6b\x69\x68\x69\x6b..\x69\x6a',
-    4: b'\x2e\x2f\x2e\x2f\x2e\x2c..\x2e\x2c\x2e\x2f\x2e\x2c..\x2e'
+    4: b'\x2e\x2f\x2e\x2f\x2e...\x2e\x2c\x2e\x2f'
     }
-    START_PATTERN_DECODED = b'\x00\x01\x00\x01\x00\x02..\x00\x02\x00\x01\x00\x02..\x00'
+    START_PATTERN_DECODED = b'\x00\x01\x00\x01\x00...\x00\x02\x00\x01\x00'
     CONFIG_SIZE = 4096
     XORBYTES = {
     3: 0x69,
@@ -112,11 +112,11 @@ class packedSetting:
                     current_category = 'SessionId' if name == 0 else 'Output'
             elif tstep in (1, 2, 5, 6):
                 length = read_dword_be(dio)
-                step_data = dio.read(length).decode()
+                step_data = dio.read(length).decode('latin-1')
                 trans[current_category].append(BeaconSettings.TSTEPS[tstep] + ' "' + step_data + '"')
             elif tstep in (10, 16, 9):
                 length = read_dword_be(dio)
-                step_data = dio.read(length).decode()
+                step_data = dio.read(length).decode('latin-1')
                 if tstep == 9:
                     trans['ConstParams'].append(step_data)
                 else:
@@ -241,7 +241,6 @@ class packedSetting:
 
                 conf_data = prog
             if self.hashBlob:
-                conf_data = conf_data.strip(b'\x00')
                 conf_data = hashlib.md5(conf_data).hexdigest()
 
             return conf_data
@@ -249,7 +248,7 @@ class packedSetting:
         if self.is_headers:
             return self.parse_transformdata(conf_data)
 
-        conf_data = conf_data.strip(b'\x00').decode()
+        conf_data = conf_data.strip(b'\x00').decode('latin-1')
         return conf_data
 
 

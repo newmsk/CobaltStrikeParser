@@ -36,7 +36,7 @@ class TestBeaconParsing(unittest.TestCase):
         f = decrypt_sample(path)
         parser = cobaltstrikeConfig(f)
         conf = parser.parse_encrypted_config()
-        self.assertEqual(conf.get("PublicKey_MD5"), "d2c8ec15d925e2514714d619022f7cdf")
+        self.assertEqual(conf.get("PublicKey_MD5"), "fbc7faad3bf1d91fefde4244476c4ffd")
 
     def test_encrypted_x86(self):
         path = os.path.join(
@@ -47,7 +47,7 @@ class TestBeaconParsing(unittest.TestCase):
         f = decrypt_sample(path)
         parser = cobaltstrikeConfig(f)
         conf = parser.parse_encrypted_config()
-        self.assertEqual(conf.get("PublicKey_MD5"), "8ac540617dddcdf575f6dc207abb7344")
+        self.assertEqual(conf.get("PublicKey_MD5"), "41d0f3a319ef312f6e30a370c544477b")
 
     def test_trial_beacon_x86(self):
         path = os.path.join(
@@ -73,6 +73,18 @@ class TestBeaconParsing(unittest.TestCase):
         self.assertEqual(conf.get("Retry_Max_Attempts"), 0)
         self.assertEqual(conf.get("Retry_Increase_Attempts"), 0)
         self.assertEqual(conf.get("Retry_Duration"), 0)
+
+    def test_csv4_startbytes(self):
+        path = os.path.join(
+            os.path.dirname(__file__),
+            "samples",
+            "5cd19717831e5259d535783be33f86ad7e77f8df25cd8f342da4f4f33327d989.zip",
+        )
+        f = decrypt_sample(path)
+        parser = cobaltstrikeConfig(f)
+        conf = parser.parse_config()
+        self.assertNotEqual(conf, None)
+
 
 
 if __name__ == "__main__":
